@@ -778,7 +778,7 @@
                         <p id="dashTotalSangria" class="text-xl md:text-2xl font-black text-red-500 dark:text-red-400">R$ 0,00</p>
                     </div>
                     <div class="bg-white dark:bg-[#161925] p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 relative overflow-hidden">
-                        <div class="absolute right-0 top-0 w-8 h-full bg-green-500 opacity-10"></div>
+                        <div class="absolute right-0 top-0 w-8 h-full bg-white opacity-10"></div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase mb-1">Caixa Líquido</p>
                         <p id="dashTotalLiquido" class="text-xl md:text-2xl font-black text-green-600 dark:text-emerald-400">R$ 0,00</p>
                     </div>
@@ -923,8 +923,30 @@
 
                         <div class="bg-gray-800 dark:bg-gradient-to-b dark:from-[#1c2033] dark:to-[#161925] rounded-3xl p-6 text-white shadow-lg border border-transparent dark:border-gray-800 mt-2">
                             <h3 class="font-bold text-lg mb-1 text-white dark:text-purple-400">Restauração (Backup)</h3>
-                            <p class="text-gray-300 dark:text-gray-400 text-sm mb-6 border-b border-gray-700 dark:border-gray-800 pb-4">Importe planilhas antigas (.csv) geradas pelo sistema para restaurar as vendas e sangrias.</p>
+                            <p class="text-gray-300 dark:text-gray-400 text-sm mb-6 border-b border-gray-700 dark:border-gray-800 pb-4">Exporte backups completos por período e importe planilhas antigas (.csv) para restaurar as vendas e sangrias.</p>
                             
+                            <div class="space-y-3 mb-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">Mês inteiro (opcional)</label>
+                                    <input type="month" id="filtroBackupMes" onchange="window.preencherPeriodoBackupMes()" class="w-full bg-gray-700 dark:bg-[#0f111a] text-white border border-gray-600 dark:border-gray-700 p-3 rounded-xl focus:outline-none focus:border-purple-500 transition-colors" style="color-scheme: dark;">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1">Data início</label>
+                                        <input type="date" id="filtroBackupDataInicio" class="w-full bg-gray-700 dark:bg-[#0f111a] text-white border border-gray-600 dark:border-gray-700 p-3 rounded-xl focus:outline-none focus:border-purple-500 transition-colors" style="color-scheme: dark;">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1">Data fim</label>
+                                        <input type="date" id="filtroBackupDataFim" class="w-full bg-gray-700 dark:bg-[#0f111a] text-white border border-gray-600 dark:border-gray-700 p-3 rounded-xl focus:outline-none focus:border-purple-500 transition-colors" style="color-scheme: dark;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="window.baixarBackupCSV()" class="w-full bg-green-600 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold py-4 px-4 rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4 4V4" /></svg>
+                                Baixar Backup CSV
+                            </button>
+
                             <input type="file" id="arquivoImportacao" accept=".csv" class="hidden" onchange="window.processarImportacaoCSV(event)">
                             <button onclick="document.getElementById('arquivoImportacao').click()" class="w-full bg-gray-700 hover:bg-gray-600 dark:bg-[#0f111a] dark:hover:bg-gray-800 text-white font-bold py-4 px-4 rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 border border-gray-600 dark:border-gray-700">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
@@ -1221,6 +1243,13 @@
             window.renderizarDashVendedores();
             window.atualizarLembretes();
             window.renderizarBoletos();
+
+            const mesBackup = document.getElementById('filtroBackupMes');
+            if (mesBackup) {
+                const agoraBackup = new Date();
+                mesBackup.value = `${agoraBackup.getFullYear()}-${String(agoraBackup.getMonth() + 1).padStart(2, '0')}`;
+                window.preencherPeriodoBackupMes();
+            }
         };
 
         const formataBRL = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -1255,11 +1284,11 @@
         window.verificarSenhaAdmin = (event) => {
             if (event && event.type === 'keydown' && event.key !== 'Enter') return;
             const senha = document.getElementById('inputSenhaAdmin').value;
-            if (senha === '1234' || senha === 'admin') { 
+            if (senha === '4512' || senha === 'admin') { 
                 window.fecharModalSenha();
                 window.abrirAdmin();
             } else {
-                mostrarToast('Senha incorreta! Use: 1234', 'bg-red-600 text-white');
+                mostrarToast('Senha incorreta! Use: 4512', 'bg-red-600 text-white');
             }
         };
 
@@ -1543,9 +1572,9 @@
                 pdf.setFontSize(7);
                 pdf.text('Documento sem valor fiscal', 40, y, { align: 'center' });
                 y += 4;
-                pdf.text('Tecn In', 40, y, { align: 'center' });
+                pdf.text('TECN IN', 40, y, { align: 'center' });
 
-                const nomeArquivo = `Tecn_In_Cupom_${Date.now()}.pdf`;
+                const nomeArquivo = `Real_Papelaria_Cupom_${Date.now()}.pdf`;
                 pdf.save(nomeArquivo);
 
                 mostrarToast("Cupom baixado em PDF.", "bg-green-600 text-white");
@@ -1573,7 +1602,7 @@
 
                 pdf.setFont('courier', 'bold');
                 pdf.setFontSize(15);
-                pdf.text('TECN IN', 40, y, { align: 'center' });
+                pdf.text('REAL PAPELARIA', 40, y, { align: 'center' });
 
                 y += 5;
                 pdf.setFontSize(9);
@@ -1623,7 +1652,7 @@
                 pdf.setFontSize(7);
                 pdf.text('Comprovante de pagamento', 40, y, { align: 'center' });
 
-                pdf.save(`Tecn_In_Comprovante_${Date.now()}.pdf`);
+                pdf.save(`Real_Papelaria_Comprovante_${Date.now()}.pdf`);
 
                 mostrarToast("Comprovante baixado em PDF.", "bg-green-600 text-white");
                 return true;
@@ -1682,8 +1711,11 @@
         };
 
         document.getElementById('btnConfirmarAcao').onclick = () => {
-            if (acaoConfirmacao) acaoConfirmacao();
-            window.fecharModal();
+            try {
+                if (acaoConfirmacao) acaoConfirmacao();
+            } finally {
+                window.fecharModal();
+            }
         };
 
         function mostrarToast(mensagem, cor = 'bg-gray-900') {
@@ -3027,6 +3059,57 @@
                 const lines = content.replace(/^\uFEFF/, '').split(/\r?\n/);
                 let importadasVendas = 0; let importadasSangrias = 0; let isSessaoSangria = false;
 
+                // Backup completo V2: restaura os objetos originais sem reconstruir
+                // campos, evitando alterações em forma de pagamento, detalhes ou demais dados.
+                if (lines[0].trim() === 'BACKUP_SISTEMA_CAIXA_V2') {
+                    try {
+                        for (let i = 2; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (!line) continue;
+
+                            const separador = line.indexOf(';');
+                            if (separador === -1) continue;
+
+                            const tipo = line.substring(0, separador);
+                            const dadosCodificados = line.substring(separador + 1);
+                            const registro = JSON.parse(decodeURIComponent(dadosCodificados));
+
+                            if (tipo === 'VENDA') {
+                                const existe = todasVendasBanco.some(v => String(v.id) === String(registro.id));
+                                if (!existe) {
+                                    todasVendasBanco.push(registro);
+                                    importadasVendas++;
+                                }
+                            } else if (tipo === 'SANGRIA') {
+                                const existe = todasDespesasBanco.some(d => String(d.id) === String(registro.id));
+                                if (!existe) {
+                                    todasDespesasBanco.push(registro);
+                                    importadasSangrias++;
+                                }
+                            }
+                        }
+
+                        if (importadasVendas > 0 || importadasSangrias > 0) {
+                            todasVendasBanco.sort((a, b) => b.timestamp - a.timestamp);
+                            todasDespesasBanco.sort((a, b) => b.timestamp - a.timestamp);
+                            localStorage.setItem('vendasSistemaCaixa', JSON.stringify(todasVendasBanco));
+                            localStorage.setItem('despesasSistemaCaixa', JSON.stringify(todasDespesasBanco));
+                            filtrarEAtualizarDashboard();
+                            window.renderizarDashVendedores();
+                            mostrarToast(`Backup restaurado: ${importadasVendas} vendas | ${importadasSangrias} sangrias!`, "bg-green-600 text-white");
+                        } else {
+                            mostrarToast("Nenhum dado novo importado.", "bg-yellow-600 text-white");
+                        }
+                    } catch (err) {
+                        console.error("Erro ao restaurar backup completo:", err);
+                        mostrarToast("Não foi possível restaurar este backup.", "bg-red-600 text-white");
+                    }
+
+                    event.target.value = '';
+                    return;
+                }
+
+                // Compatibilidade com os CSVs antigos do sistema.
                 for(let i = 1; i < lines.length; i++) { 
                     const line = lines[i].trim();
                     if(!line) continue;
@@ -3106,6 +3189,66 @@
                 event.target.value = '';
             };
             reader.readAsText(file);
+        };
+
+        window.preencherPeriodoBackupMes = () => {
+            const mes = document.getElementById('filtroBackupMes').value;
+            if (!mes) return;
+
+            const [ano, mesNumero] = mes.split('-').map(Number);
+            const ultimoDia = new Date(ano, mesNumero, 0).getDate();
+            document.getElementById('filtroBackupDataInicio').value = `${ano}-${String(mesNumero).padStart(2, '0')}-01`;
+            document.getElementById('filtroBackupDataFim').value = `${ano}-${String(mesNumero).padStart(2, '0')}-${String(ultimoDia).padStart(2, '0')}`;
+        };
+
+        window.baixarBackupCSV = () => {
+            const dtInicio = document.getElementById('filtroBackupDataInicio').value;
+            const dtFim = document.getElementById('filtroBackupDataFim').value;
+
+            if (dtInicio && dtFim && dtInicio > dtFim) {
+                mostrarToast("A data de início não pode ser maior que a data de fim.", "bg-orange-500 text-white");
+                return;
+            }
+
+            let vendasBackup = todasVendasBanco;
+            let despesasBackup = todasDespesasBanco;
+
+            if (dtInicio) vendasBackup = vendasBackup.filter(v => v.dataIso >= dtInicio);
+            if (dtFim) vendasBackup = vendasBackup.filter(v => v.dataIso <= dtFim);
+            if (dtInicio) despesasBackup = despesasBackup.filter(d => d.dataIso >= dtInicio);
+            if (dtFim) despesasBackup = despesasBackup.filter(d => d.dataIso <= dtFim);
+
+            if (vendasBackup.length === 0 && despesasBackup.length === 0) {
+                mostrarToast("Nenhuma movimentação encontrada no período selecionado.", "bg-orange-500 text-white");
+                return;
+            }
+
+            let csv = "\uFEFFBACKUP_SISTEMA_CAIXA_V2\n";
+            csv += "TIPO;DADOS\n";
+
+            vendasBackup.forEach(v => {
+                csv += `VENDA;${encodeURIComponent(JSON.stringify(v))}\n`;
+            });
+
+            despesasBackup.forEach(d => {
+                csv += `SANGRIA;${encodeURIComponent(JSON.stringify(d))}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+
+            const periodoNome = dtInicio && dtFim
+                ? `${dtInicio}_a_${dtFim}`
+                : (dtInicio ? `a_partir_${dtInicio}` : (dtFim ? `ate_${dtFim}` : 'completo'));
+
+            link.download = `Backup_Sistema_Caixa_${periodoNome}_${new Date().getTime()}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+
+            mostrarToast(`Backup gerado: ${vendasBackup.length} vendas | ${despesasBackup.length} sangrias.`, "bg-green-600 text-white");
         };
 
         // ==========================================
